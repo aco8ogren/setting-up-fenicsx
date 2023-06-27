@@ -1,0 +1,10 @@
+{
+    "image": "dolfinx/dolfinx:stable",
+    "name": "fenicsx",
+    "containerEnv": {
+        "PKG_CONFIG_PATH": "/usr/local/dolfinx-complex/lib/pkgconfig:$PKG_CONFIG_PATH",
+        "PETSC_ARCH": "linux-gnu-complex-32",
+        "PYTHONPATH":"/usr/local/dolfinx-complex/lib/python3.10/dist-packages:$PYTHONPATH",
+        "LD_LIBRARY_PATH": "/usr/local/dolfinx-complex/lib:$LD_LIBRARY_PATH"
+}
+}
