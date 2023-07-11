@@ -1,2 +1,20 @@
 
 output/
+
+*.asv
+
+*.h5
+
+*.xdmf
+
+*.png
+
+*.mph
+
+*.mat
+
+*.vtu
+
+*.pvtu
+
+*.vtk
