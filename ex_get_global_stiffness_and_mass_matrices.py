@@ -1,18 +1,16 @@
 import numpy as np
 import ufl
+import os
 
 from petsc4py import PETSc
 from mpi4py import MPI
 from dolfinx import fem, mesh, plot, io
 
-import scipy
-import os
-
 lower_left = [0,0,0]
-upper_right = [2,2,2]
+upper_right = [1,1,1]
 box_bounds = [lower_left,upper_right]
 
-mesh_resolution = [10,10,10]
+mesh_resolution = [5,5,5]
 
 cell_type = mesh.CellType.hexahedron
 
@@ -61,50 +59,19 @@ M.assemble()
 
 # =========================================================
 
-import sys, slepc4py
-slepc4py.init(sys.argv)
+ki, kj, kv = K.getValuesCSR()
 
-from slepc4py import SLEPc
+mi, mj, mv = M.getValuesCSR()
 
-from dolfinx.io import XDMFFile
+import scipy
 
-# Create and configure eigenvalue solver
-N_eig = 20
-eigensolver = SLEPc.EPS().create(MPI.COMM_WORLD)
-eigensolver.setDimensions(N_eig)
-eigensolver.setProblemType(SLEPc.EPS.ProblemType.GHEP)
-st = SLEPc.ST().create(MPI.COMM_WORLD)
-st.setType(SLEPc.ST.Type.SINVERT)
-st.setShift(0.1)
-st.setFromOptions()
-eigensolver.setST(st)
-eigensolver.setOperators(K,M)
-eigensolver.setFromOptions()
+K_scipy_sparse = scipy.sparse.csr_matrix((kv,kj,ki))
+M_scipy_sparse = scipy.sparse.csr_matrix((mv,mj,mi))
 
-# Compute eigenvalue-eigenvector pairs
-eigensolver.solve()
-evs = eigensolver.getConverged()
-vr, vi = K.getVecs()
-u_output = fem.Function(V)
-u_output.name = "Eigenvector"
-print( "Number of converged eigenpairs %d" % evs )
-
-eigenfrequencies = np.zeros((N_eig,1))
-if evs > 0:
-    with XDMFFile(MPI.COMM_WORLD, "eigenvectors.xdmf", "w") as xdmf:
-        xdmf.write_mesh(domain)
-        for i in range (min(N_eig, evs)):
-            l = eigensolver.getEigenpair(i, vr, vi)
-            freq = np.sqrt(l.real)/2/np.pi
-            eigenfrequencies[i] = freq
-            print(f"Mode {i}: {freq} Hz")
-            u_output.x.array[:] = vr
-            xdmf.write_function(u_output, i)
-
+matfile_dict = {'K':K_scipy_sparse,'M':M_scipy_sparse}
 pyfilename_with_ext = os.path.splitext(os.path.basename(__file__))
 pyfilename = pyfilename_with_ext[0]
+scipy.io.savemat(pyfilename + '.mat',matfile_dict)
 
-vars_to_save = {'eigenfrequencies':eigenfrequencies}
-
-scipy.io.savemat(pyfilename+'_solution.mat',vars_to_save)
-aaa = 111
+with io.VTKFile(domain.comm, pyfilename + '_mesh.vtk', "w") as vtk_file:
+    vtk_file.write_mesh(domain)

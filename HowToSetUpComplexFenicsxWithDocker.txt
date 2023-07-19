@@ -1,0 +1,16 @@
+How to open this folder in the docker container:
+
+1. Open VS Code.
+
+2. Press ctrl+shift+p
+
+3. Type 'Dev Containers: Open Folder in Container...'
+
+4. Select setting-up-fenicsx.
+
+VS Code will then open setting-up-fenicsx using the Docker image with the proper environment variables set to use the complex version of Fenicsx.
+VS Code knows to do this by reading the information in setting-up-fenicsx/.devcontainer/devcontainer.json.
+
+Then, as the Python kernel I use the 'recommended' one called 'Python 3.10.6' whose path is '/bin/python3.10'
+
+For some reason, this uses the second 'quizzical_engelbart' container rather than the original container that I named fenicsx.

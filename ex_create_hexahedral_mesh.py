@@ -9,7 +9,7 @@ lower_left = [0,0,0]
 upper_right = [1,1,1]
 box_bounds = [lower_left,upper_right]
 
-mesh_resolution = [1,1,1]
+mesh_resolution = [2,2,2]
 
 cell_type = mesh.CellType.hexahedron
 
